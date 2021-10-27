@@ -33,6 +33,8 @@ if not exist %release_dir% (
 )
 
 set PATH=%PATH%;%~dp0..\pupil_external
+set PATH=%PATH%;C:\Python36\Lib\site-packages\pyzmq.libs
+set PATH=%PATH%;C:\Python36\Lib\site-packages\pyglui.libs
 
 call :Bundle capture %current_tag%
 call :Bundle service %current_tag%
