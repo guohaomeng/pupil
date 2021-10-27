@@ -142,7 +142,6 @@ elif platform.system() == "Windows":
     a = Analysis(
         ["../../pupil_src/main.py"],
         pathex=["../../pupil_src/shared_modules/", str(external_libs_path)],
-        binaries=None,
         datas=datas,
         hiddenimports=hidden_imports,
         binaries=binaries,
