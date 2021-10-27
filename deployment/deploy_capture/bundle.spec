@@ -27,7 +27,7 @@ if platform.system() != "Windows":
     dependencies.append("cysignals")
 
 module_collection = [collect_all(dep) for dep in dependencies]
-datas, binaries, hidden_imports = zip(*module_collection)
+datas, binaries, hidden_imports = map(list, zip(*module_collection))
 
 from pyglui import ui
 
