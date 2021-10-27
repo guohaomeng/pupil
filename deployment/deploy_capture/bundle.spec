@@ -14,7 +14,6 @@ from PyInstaller.utils.hooks import collect_all
 
 dependencies = [
     "av",
-    "cysignals",
     "pyglui",
     "pupil_apriltags",
     "sklearn",
@@ -24,6 +23,9 @@ dependencies = [
     "numpy",
     "scipy",
 ]
+if platform.system() != "Windows":
+    dependencies.append("cysignals")
+
 module_collection = [collect_all(dep) for dep in dependencies]
 datas, binaries, hidden_imports = zip(*module_collection)
 
