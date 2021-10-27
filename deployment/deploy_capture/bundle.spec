@@ -1,15 +1,10 @@
 # -*- mode: python -*-
 
 import functools
-import glob
-import os
-import os.path
 import pathlib
 import platform
 import sys
 
-import numpy
-import pkg_resources
 from PyInstaller.utils.hooks import collect_all
 
 dependencies = [
@@ -29,7 +24,6 @@ if platform.system() != "Windows":
 module_collection = [collect_all(dep) for dep in dependencies]
 sum_lists = functools.partial(sum, start=[])
 datas, binaries, hidden_imports = map(sum_lists, zip(*module_collection))
-from pyglui import ui
 
 
 if platform.system() == "Darwin":
@@ -130,14 +124,6 @@ elif platform.system() == "Windows":
     import os
     import os.path
     import sys
-
-    np_path = os.path.dirname(numpy.__file__)
-    np_dlls = glob.glob(np_path + "/core/*.dll")
-    np_dll_list = []
-
-    for dll_path in np_dlls:
-        dll_p, dll_f = os.path.split(dll_path)
-        np_dll_list += [(dll_f, dll_path, "BINARY")]
 
     external_libs_path = pathlib.Path("../../pupil_external")
 
