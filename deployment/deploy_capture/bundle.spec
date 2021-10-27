@@ -10,37 +10,25 @@ import sys
 
 import numpy
 import pkg_resources
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+from PyInstaller.utils.hooks import collect_all
 
-hidden_imports = []
-hidden_imports += collect_submodules("av")
+dependencies = [
+    "av",
+    "cysignals",
+    "pyglui",
+    "pupil_apriltags",
+    "sklearn",
+    "pye3d",
+    "glfw",
+    "pupil_apriltags",
+    "numpy",
+    "scipy",
+]
+module_collection = [collect_all(dep) for dep in dependencies]
+datas, binaries, hidden_imports = zip(*module_collection)
 
-if platform.system() != "Windows":
-    hidden_imports.append("cysignals")
-
-hidden_imports += collect_submodules("pyglui")
-hidden_imports += collect_submodules("pupil_apriltags")
-hidden_imports += collect_submodules("sklearn")
-
-import glfw
-import pupil_apriltags
 from pyglui import ui
 
-apriltag_lib_path = pathlib.Path(pupil_apriltags.__file__).parent
-
-
-def apriltag_relative_path(absolute_path):
-    """Returns pupil_apriltags/lib/*"""
-    return os.path.join(*absolute_path.parts[-3:])
-
-
-glfw_name = glfw._glfw._name
-glfw_path = pathlib.Path(glfw_name)
-if not glfw_path.exists():
-    glfw_path = pathlib.Path(pkg_resources.resource_filename("glfw", glfw_name))
-glfw_binaries = [(glfw_path.name, str(glfw_path), "BINARY")]
-
-data_files_pye3d = collect_data_files("pye3d")
 
 if platform.system() == "Darwin":
     sys.path.append(".")
@@ -54,7 +42,8 @@ if platform.system() == "Darwin":
         hookspath=None,
         runtime_hooks=["../find_opengl_bigsur.py"],
         excludes=["matplotlib"],
-        datas=data_files_pye3d,
+        datas=datas,
+        binaries=binaries,
     )
     pyz = PYZ(a.pure)
     exe = EXE(
@@ -68,11 +57,6 @@ if platform.system() == "Darwin":
         console=True,
     )
 
-    apriltag_libs = [
-        (apriltag_relative_path(lib), str(lib), "BINARY")
-        for lib in apriltag_lib_path.rglob("*.dylib")
-    ]
-
     # exclude system lib.
     libSystem = [bn for bn in a.binaries if "libSystem.dylib" in bn]
 
@@ -81,11 +65,6 @@ if platform.system() == "Darwin":
         a.binaries - libSystem,
         a.zipfiles,
         a.datas,
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        apriltag_libs,
-        glfw_binaries,
         strip=None,
         upx=True,
         name="Pupil Capture",
@@ -107,7 +86,8 @@ elif platform.system() == "Linux":
         hookspath=None,
         runtime_hooks=None,
         excludes=["matplotlib"],
-        datas=data_files_pye3d,
+        datas=datas,
+        binaries=binaries,
     )
 
     pyz = PYZ(a.pure)
@@ -134,22 +114,11 @@ elif platform.system() == "Linux":
     # required for 17.10 interoperability.
     binaries = [b for b in binaries if not "libdrm.so.2" in b[0]]
 
-    apriltag_libs = [
-        (apriltag_relative_path(lib), str(lib), "BINARY")
-        for lib in apriltag_lib_path.rglob("*.so")
-    ]
-
     coll = COLLECT(
         exe,
         binaries,
         a.zipfiles,
         a.datas,
-        [("libGLEW.so", "/usr/lib/x86_64-linux-gnu/libGLEW.so", "BINARY")],
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        apriltag_libs,
-        glfw_binaries,
         strip=True,
         upx=True,
         name="pupil_capture",
@@ -168,16 +137,15 @@ elif platform.system() == "Windows":
         dll_p, dll_f = os.path.split(dll_path)
         np_dll_list += [(dll_f, dll_path, "BINARY")]
 
-    hidden_imports += collect_submodules("scipy")
-
     external_libs_path = pathlib.Path("../../pupil_external")
 
     a = Analysis(
         ["../../pupil_src/main.py"],
         pathex=["../../pupil_src/shared_modules/", str(external_libs_path)],
         binaries=None,
-        datas=data_files_pye3d,
+        datas=datas,
         hiddenimports=hidden_imports,
+        binaries=binaries,
         hookspath=None,
         runtime_hooks=None,
         win_no_prefer_redirects=False,
@@ -199,11 +167,6 @@ elif platform.system() == "Windows":
         resources=["pupil-capture.ico,ICON"],
     )
 
-    apriltag_libs = [
-        (apriltag_relative_path(lib), str(lib), "BINARY")
-        for lib in apriltag_lib_path.rglob("*.dll")
-    ]
-
     vc_redist_path = external_libs_path / "vc_redist"
     vc_redist_libs = [
         (lib.name, str(lib), "BINARY") for lib in vc_redist_path.glob("*.dll")
@@ -215,13 +178,7 @@ elif platform.system() == "Windows":
         a.zipfiles,
         a.datas,
         [("PupilDrvInst.exe", "../../pupil_external/PupilDrvInst.exe", "BINARY")],
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        apriltag_libs,
-        glfw_binaries,
         vc_redist_libs,
-        np_dll_list,
         strip=False,
         upx=True,
         name="Pupil Capture",
