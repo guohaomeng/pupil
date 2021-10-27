@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 
-
+import functools
 import glob
 import os
 import os.path
@@ -27,8 +27,8 @@ if platform.system() != "Windows":
     dependencies.append("cysignals")
 
 module_collection = [collect_all(dep) for dep in dependencies]
-datas, binaries, hidden_imports = map(list, zip(*module_collection))
-
+sum_lists = functools.partial(sum, start=[])
+datas, binaries, hidden_imports = map(sum_lists, zip(*module_collection))
 from pyglui import ui
 
 
