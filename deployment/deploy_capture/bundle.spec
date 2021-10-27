@@ -22,7 +22,7 @@ if platform.system() != "Windows":
     dependencies.append("cysignals")
 
 module_collection = [collect_all(dep) for dep in dependencies]
-sum_lists = functools.partial(sum, start=[])
+sum_lists = functools.partial(sum, [])  # sum all lists function
 datas, binaries, hidden_imports = map(sum_lists, zip(*module_collection))
 
 
