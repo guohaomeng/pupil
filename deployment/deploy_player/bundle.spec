@@ -68,6 +68,9 @@ if platform.system() == "Darwin":
         strip=None,
         upx=False,
         console=True,
+        target_arch="x86_64",
+        codesign_identity="Developer ID Application: Pupil Labs UG (haftungsbeschrankt) (R55K9ESN6B)",
+        entitlements_file="../entitlements.plist",
     )
 
     apriltag_libs = [

@@ -27,30 +27,21 @@ ext=app
 # bundle Pupil Capture
 printf "\n##########\nBundling Pupil Capture\n##########\n\n"
 cd deploy_capture
-./bundle.sh \
-    --codesign-identity "$sign" \
-    --osx-entitlements-file entitlements.plist \
-    --target-arch x86_64
+./bundle.sh
 mv dist/*.$ext ../$release_dir
 cd ..
 
 # bundle Pupil Service
 printf "\n##########\nBundling Pupil Service\n##########\n\n"
 cd deploy_service
-./bundle.sh \
-    --codesign-identity "$sign" \
-    --osx-entitlements-file entitlements.plist \
-    --target-arch x86_64
+./bundle.sh
 mv dist/*.$ext ../$release_dir
 cd ..
 
 # bundle Pupil Player
 printf "\n##########\nBundling Pupil Player\n##########\n\n"
 cd deploy_player
-./bundle.sh \
-    --codesign-identity "$sign" \
-    --osx-entitlements-file entitlements.plist \
-    --target-arch x86_64
+./bundle.sh
 mv dist/*.$ext ../$release_dir
 cd ..
 
