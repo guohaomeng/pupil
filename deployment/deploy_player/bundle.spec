@@ -99,6 +99,7 @@ if platform.system() == "Darwin":
         coll,
         name="Pupil Player.app",
         icon="pupil-player.icns",
+        bundle_identifier="com.pupil-labs.core.player",
         version=str(pupil_version()),
         info_plist={"NSHighResolutionCapable": "True"},
     )

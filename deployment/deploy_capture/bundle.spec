@@ -76,6 +76,7 @@ if platform.system() == "Darwin":
         coll,
         name="Pupil Capture.app",
         icon="pupil-capture.icns",
+        bundle_identifier="com.pupil-labs.core.capture",
         version=str(pupil_version()),
         info_plist={"NSHighResolutionCapable": "True"},
     )

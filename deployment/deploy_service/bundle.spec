@@ -82,6 +82,7 @@ if platform.system() == "Darwin":
         coll,
         name="Pupil Service.app",
         icon="pupil-service.icns",
+        bundle_identifier="com.pupil-labs.core.service",
         version=str(pupil_version()),
         info_plist={"NSHighResolutionCapable": "True"},
     )
