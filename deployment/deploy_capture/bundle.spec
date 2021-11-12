@@ -8,6 +8,7 @@ import sys
 from PyInstaller.utils.hooks import collect_all
 
 dependencies = [
+    "ctypes",
     "av",
     "pyglui",
     "pupil_apriltags",
@@ -15,7 +16,7 @@ dependencies = [
     "pye3d",
     "glfw",
     "pupil_apriltags",
-    "numpy",
+    # "numpy",
     "scipy",
 ]
 if platform.system() != "Windows":
