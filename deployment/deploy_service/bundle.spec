@@ -8,29 +8,30 @@ import pathlib
 import platform
 import sys
 
-import numpy
-import pkg_resources
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+from PyInstaller.utils.hooks import collect_all
 
-hidden_imports = []
-hidden_imports += collect_submodules("av")
-
+dependencies = [
+    "av",
+    "pyglui",
+    "pupil_apriltags",
+    "sklearn",
+    "pye3d",
+    "glfw",
+    "pupil_apriltags",
+    "numpy",
+    "scipy",
+]
 if platform.system() != "Windows":
-    hidden_imports.append("cysignals")
+    dependencies.append("cysignals")
 
-hidden_imports += collect_submodules("pyglui")
-hidden_imports += collect_submodules("sklearn")
 
-import glfw
-from pyglui import ui
+def sum_lists(lists_to_sum):
+    return sum(lists_to_sum, [])
 
-glfw_name = glfw._glfw._name
-glfw_path = pathlib.Path(glfw_name)
-if not glfw_path.exists():
-    glfw_path = pathlib.Path(pkg_resources.resource_filename("glfw", glfw_name))
-glfw_binaries = [(glfw_path.name, str(glfw_path), "BINARY")]
 
-data_files_pye3d = collect_data_files("pye3d")
+module_collection = [collect_all(dep) for dep in dependencies]
+datas, binaries, hidden_imports = map(sum_lists, zip(*module_collection))
+
 
 if platform.system() == "Darwin":
     sys.path.append(".")
@@ -45,7 +46,8 @@ if platform.system() == "Darwin":
         hookspath=None,
         runtime_hooks=["../find_opengl_bigsur.py"],
         excludes=["matplotlib"],
-        datas=data_files_pye3d,
+        datas=datas,
+        binaries=binaries,
     )
     pyz = PYZ(a.pure)
     exe = EXE(
@@ -69,10 +71,6 @@ if platform.system() == "Darwin":
         a.binaries - libSystem,
         a.zipfiles,
         a.datas,
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        glfw_binaries,
         strip=None,
         upx=True,
         name="Pupil Service",
@@ -96,7 +94,8 @@ elif platform.system() == "Linux":
         hookspath=None,
         runtime_hooks=None,
         excludes=["matplotlib"],
-        datas=data_files_pye3d,
+        datas=datas,
+        binaries=binaries,
     )
 
     pyz = PYZ(a.pure)
@@ -128,11 +127,6 @@ elif platform.system() == "Linux":
         binaries,
         a.zipfiles,
         a.datas,
-        [("libGLEW.so", "/usr/lib/x86_64-linux-gnu/libGLEW.so", "BINARY")],
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        glfw_binaries,
         strip=True,
         upx=True,
         name="pupil_service",
@@ -143,23 +137,13 @@ elif platform.system() == "Windows":
     import os.path
     import sys
 
-    np_path = os.path.dirname(numpy.__file__)
-    np_dlls = glob.glob(np_path + "/core/*.dll")
-    np_dll_list = []
-
-    for dll_path in np_dlls:
-        dll_p, dll_f = os.path.split(dll_path)
-        np_dll_list += [(dll_f, dll_path, "BINARY")]
-
-    hidden_imports += collect_submodules("scipy")
-
     external_libs_path = pathlib.Path("../../pupil_external")
 
     a = Analysis(
         ["../../pupil_src/main.py"],
         pathex=["../../pupil_src/shared_modules/", str(external_libs_path)],
-        binaries=None,
-        datas=data_files_pye3d,
+        binaries=binaries,
+        datas=datas,
         hiddenimports=hidden_imports,
         hookspath=None,
         runtime_hooks=None,
@@ -193,11 +177,6 @@ elif platform.system() == "Windows":
         a.zipfiles,
         a.datas,
         [("PupilDrvInst.exe", "../../pupil_external/PupilDrvInst.exe", "BINARY")],
-        [("pyglui/OpenSans-Regular.ttf", ui.get_opensans_font_path(), "DATA")],
-        [("pyglui/Roboto-Regular.ttf", ui.get_roboto_font_path(), "DATA")],
-        [("pyglui/pupil_icons.ttf", ui.get_pupil_icons_font_path(), "DATA")],
-        glfw_binaries,
-        np_dll_list,
         vc_redist_libs,
         strip=False,
         upx=True,
