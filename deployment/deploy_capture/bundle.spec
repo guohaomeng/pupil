@@ -73,6 +73,21 @@ if platform.system() == "Darwin":
         name="Pupil Capture",
     )
 
+    folder_name_causing_signing_issue = ".dylibs"
+    folder_name_replacement = "_wheel_dylibs"
+    logging.info(
+        f"Replace {folder_name_causing_signing_issue} targets with "
+        f"{folder_name_replacement}"
+    )
+    for idx in range(len(coll.toc)):
+        bundle_path, abs_path, code = coll.toc[idx]
+        if ".dylibs" in bundle_path:
+            bundle_path = bundle_path.replace(
+                folder_name_causing_signing_issue, folder_name_replacement
+            )
+            logging.debug(f"Will copy {abs_path} to {bundle_path}")
+            coll.toc[idx] = bundle_path, abs_path, code
+
     app = BUNDLE(
         coll,
         name="Pupil Capture.app",
